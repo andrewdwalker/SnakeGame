@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ namespace SnakeGame.Models
       //SnakeBody = 2,
       //SnakeHead = 3
    }
-   public class GridElement
+   public class GridElement : INotifyPropertyChanged
    {
       private uint _row;
       private uint _col;
@@ -26,7 +27,45 @@ namespace SnakeGame.Models
          _gridElementType = gridElementType;
       }
 
-      public GridElementType GridElementType { get; set; }
+      public GridElementType GridElementType
+      {
+         get
+         {
+            return _gridElementType;
+         }
+         set
+         {
+            _gridElementType = value;
+            OnPropertyChanged("GridElementType");
+         }
+      }
+      public uint Row
+      {
+         get
+         {
+            return _row;
+         }
+      }
+      public uint Col
+      {
+         get
+         {
+            return _col;
+         }
+      }
+
+      public event PropertyChangedEventHandler PropertyChanged;
+
+      protected virtual void OnPropertyChanged(string propertyName)
+      {
+
+         PropertyChangedEventHandler handler = this.PropertyChanged;
+         if (handler != null)
+         {
+            var e = new PropertyChangedEventArgs(propertyName);
+            handler(this, e);
+         }
+      }
    }
 
    

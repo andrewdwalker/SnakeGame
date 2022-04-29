@@ -19,15 +19,11 @@ namespace SnakeGame
       {
          MainWindow view = new MainWindow();
 
-         GameGridModel gameGridModel = new GameGridModel(5, 5);
-         Snake snake = new Snake(gameGridModel.GetGridElement(2,2));
-         Food food = new Food(new GridElement[] { gameGridModel.GetGridElement(3, 3), gameGridModel.GetGridElement(3, 4) } );
+         GameGridModel gameGridModel = new GameGridModel(12, 12, 12, 1);
+        
+         SnakeViewModel viewModel = new SnakeViewModel(gameGridModel);
 
-         SnakeViewModel viewModel = new SnakeViewModel(gameGridModel, snake, food);
-
-         //IStage stageModel = new Stage(new HardwareStage());
-         //ILight lightModel = new Light();
-         //EighteenFiftyNineViewModel viewModel = new EighteenFiftyNineViewModel(stageModel, lightModel);
+         
          view.DataContext = viewModel;
          view.Show();
 

@@ -4,10 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SnakeGame"
+        xmlns:views="clr-namespace:SnakeGame.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="700" Width="800">
 
     <Window.Resources>
+
+        <views:TileToColorConverter
+         x:Key="TileToColorConverter" />
+
+        <views:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" 
+     TrueValue="Visible" FalseValue="Hidden" />
+
         <Style TargetType="{x:Type Border}">
             <Setter Property="BorderThickness" Value="2" />
             <Setter Property="BorderBrush" Value="Red" />
@@ -16,90 +24,110 @@
             <Setter Property="Margin" Value="5" />
             <Setter Property="Content" Value="Test" />
         </Style>
+
+        <DataTemplate x:Key="DataTemplate_Level2">
+            <Button Content="{Binding GridElementType}" Background="{Binding Path=GridElementType, Converter={StaticResource TileToColorConverter}}"  Height="30" Width="30" Margin="1,1,1,1"/>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DataTemplate_Level1">
+            <ItemsControl ItemsSource="{Binding}"   ItemTemplate="{DynamicResource DataTemplate_Level2}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </DataTemplate>
     </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Key="Up" Command="{Binding MoveSnake}" CommandParameter="Up"></KeyBinding>
+        <KeyBinding Key="Right" Command="{Binding MoveSnake}" CommandParameter="Right"></KeyBinding>
+        <KeyBinding Key="Down" Command="{Binding MoveSnake}" CommandParameter="Down"></KeyBinding>
+        <KeyBinding Key="Left" Command="{Binding MoveSnake}" CommandParameter="Left"></KeyBinding>
+        <KeyBinding Key="A" Command="{Binding MoveSnake}" CommandParameter="Left"></KeyBinding>
+    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
+        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical">
+            <Button Width="40" Height="40" FontFamily="Segoe MDL2 Assets" Content="&#xE935;" FontSize="30" HorizontalContentAlignment="Center" HorizontalAlignment="Center"
+                    VerticalContentAlignment="Center" VerticalAlignment="Center" Command="{Binding Path=MoveSnake}" CommandParameter="Up" ToolTip="Move Up!"/>
+            <StackPanel Orientation="Horizontal" >
+                <Button Width="40" Height="40" FontFamily="Segoe MDL2 Assets" Content="&#xE938;" FontSize="30" HorizontalContentAlignment="Center" HorizontalAlignment="Center"
+                    VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="30,20,55,20" Command="{Binding Path=MoveSnake}" CommandParameter="Left" ToolTip="Move Left!"/>
+                <Button Width="40" Height="40" FontFamily="Segoe MDL2 Assets" Content="&#xE937;" FontSize="30" HorizontalContentAlignment="Center" HorizontalAlignment="Center"
+                    VerticalContentAlignment="Center" VerticalAlignment="Center" Command="{Binding Path=MoveSnake}" CommandParameter="Right" ToolTip="Move Right!"/>
+            </StackPanel>
+            <Button Width="40" Height="40" FontFamily="Segoe MDL2 Assets" Content="&#xE936;" FontSize="30" HorizontalContentAlignment="Center" HorizontalAlignment="Center"
+                    VerticalContentAlignment="Center" VerticalAlignment="Center" Command="{Binding Path=MoveSnake}" CommandParameter="Down" ToolTip="Move Down!"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+            <Label>Debug Info</Label>
+            <TextBlock Text="{Binding DebugMessage}"></TextBlock>
+            <Button Content="Print Snake Info" Command="{Binding Path=PrintSnakeInfo}"></Button>
+        </StackPanel>
         
+        <StackPanel Grid.Row="0" Grid.Column="3" Orientation="Vertical">
+            <StackPanel Orientation="Vertical">
+                <Label Content="Number Of Rows" 
             
-            <Grid x:Name="PlayingGrid" Grid.Row="0" Grid.Column="0" ShowGridLines="True">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
+           Margin="0" 
+           Padding="5,5,5,1" />
 
-                </Grid.RowDefinitions>
+                <ComboBox  
+                Width="72"
+                Margin="5,0,5,5"
+                Padding="5,1,5,5"
+                SelectedItem="{Binding NumberOfRows}"
+                ItemsSource="{Binding NumberOfPossibleRows}" />
+            </StackPanel>
+            <StackPanel  Orientation="Vertical">
+                <Label Content="Number Of Cols" 
+            
+           Margin="0" 
+           Padding="5,5,5,1" />
 
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
-                    <ColumnDefinition Width="*"></ColumnDefinition>
+                <ComboBox  
+                Width="72"
+                Margin="5,0,5,5"
+                Padding="5,1,5,5"
+                SelectedItem="{Binding NumberOfCols}"
+                ItemsSource="{Binding NumberOfPossibleCols}" />
+            </StackPanel>
+            <StackPanel  Orientation="Vertical">
+                <Label Content="Number Of Foods" 
+            
+           Margin="0" 
+           Padding="5,5,5,1" />
 
-                </Grid.ColumnDefinitions>
-            <!-- <Border Grid.RowSpan="4" Grid.ColumnSpan="4" BorderBrush="#FF00FF51"/> -->
+                <ComboBox  
+                Width="72"
+                Margin="5,0,5,5"
+                Padding="5,1,5,5"
+                SelectedItem="{Binding NumberOfFoods}"
+                ItemsSource="{Binding NumberOfPossibleFoods}" />
+            </StackPanel>
+            <Button  VerticalAlignment="Center" HorizontalAlignment="Center"  Content="New Game!"
+                Command="{Binding Path=StartNewGame}" ToolTip="Press for new game with your new rows/cols/foods" ></Button>
+        </StackPanel>
+        <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" x:Name="lst" ItemsSource="{Binding Items}" ItemTemplate="{DynamicResource DataTemplate_Level1}"/>
 
-            <Border Grid.Row="0" Grid.Column="0">
-                    <Button />
-                </Border>
-                <Border Grid.Row="0" Grid.Column="1">
-                    <Button />
-                </Border>
-                <Border Grid.Row="0" Grid.Column="2">
-                    <Button />
-                </Border>
-                <Border Grid.Row="0" Grid.Column="3">
-                    <Button />
-                </Border>
-
-                <Border Grid.Row="1" Grid.Column="0">
-                    <Button />
-                </Border>
-                <Border Grid.Row="1" Grid.Column="1">
-                    <Button />
-                </Border>
-                <Border Grid.Row="1" Grid.Column="2">
-                    <Button />
-                </Border>
-                <Border Grid.Row="1" Grid.Column="3">
-                    <Button />
-                </Border>
-
-                <Border Grid.Row="2" Grid.Column="0">
-                    <Button />
-                </Border>
-                <Border Grid.Row="2" Grid.Column="1">
-                    <Button />
-                </Border>
-                <Border Grid.Row="2" Grid.Column="2">
-                    <Button />
-                </Border>
-                <Border Grid.Row="2" Grid.Column="3">
-                    <Button />
-                </Border>
-
-                <Border Grid.Row="3" Grid.Column="0">
-                    <Button />
-                </Border>
-                <Border Grid.Row="3" Grid.Column="1">
-                    <Button />
-                </Border>
-                <Border Grid.Row="3" Grid.Column="2">
-                    <Button />
-                </Border>
-                <Border Grid.Row="3" Grid.Column="3">
-                    <Button />
-                </Border>
-            </Grid>
-       
+        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="GameOverlay" Background="Aqua" Opacity="50" Visibility="{Binding GameOver, FallbackValue=Hidden, Converter={ StaticResource BoolToVisibilityConverter }, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
+            <TextBlock Text="Game Over!" Foreground="White" FontWeight="Bold"
+                   FontSize="24"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
+        </Border>
     </Grid>
     
 </Window>

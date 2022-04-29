@@ -12,7 +12,48 @@ namespace SnakeGame.Models
 
       public Snake(GridElement element)
       {
+         element.GridElementType = GridElementType.Snake;
          _snake.Add(element);
+      }
+
+      public GridElement GetHead()
+      {
+         return _snake.First();
+      }
+
+      public GridElement GetTail()
+      {
+         return _snake.Last();
+      }
+      
+      public void AddHead(GridElement element)
+      {
+         element.GridElementType = GridElementType.Snake;
+         _snake.Insert(0, element);
+
+      }
+
+      public void DeleteTail()
+      {
+         _snake.Last().GridElementType = GridElementType.Free;
+         _snake.RemoveAt(_snake.Count - 1);
+      }
+
+      public string GetSnakeInfo()
+      {
+         StringBuilder sb = new StringBuilder("Snake length: ", 50);
+         sb.Append(_snake.Count);
+         sb.AppendLine();
+         for (int i = 0; i < _snake.Count; i++)
+         {
+            sb.Append(i);
+            sb.Append(": Row ");
+            sb.Append(_snake[i].Row);
+            sb.Append(", Column ");
+            sb.Append(_snake[i].Col);
+            sb.AppendLine();
+         }
+         return sb.ToString();
       }
    }
 }

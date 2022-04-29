@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 /// <summary>
 /// Useful References:
 /// https://stackoverflow.com/questions/10837500/how-to-border-around-grid
+/// https://stackoverflow.com/questions/276808/how-to-populate-a-wpf-grid-based-on-a-2-dimensional-array
 /// </summary>
 namespace SnakeGame
 {

@@ -33,6 +33,11 @@ namespace SnakeGame.Models
 
       }
 
+      public GridElement GetSnakeElement(int row, int col)
+      {
+         return _snake.FirstOrDefault(p => p.Row == row && p.Col == col);
+      }
+
       public void DeleteTail()
       {
          _snake.Last().GridElementType = GridElementType.Free;

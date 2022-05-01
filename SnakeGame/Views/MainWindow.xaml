@@ -13,6 +13,8 @@
         <views:TileToColorConverter
          x:Key="TileToColorConverter" />
 
+        <views:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+        
         <views:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" 
      TrueValue="Visible" FalseValue="Hidden" />
 
@@ -46,7 +48,8 @@
         <KeyBinding Key="Left" Command="{Binding MoveSnake}" CommandParameter="Left"></KeyBinding>
         <KeyBinding Key="A" Command="{Binding MoveSnake}" CommandParameter="Left"></KeyBinding>
     </Window.InputBindings>
-    <Grid>
+    <DockPanel>
+    <Grid DockPanel.Dock="Bottom">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>
@@ -58,7 +61,9 @@
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical">
+            <StackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical" 
+                        IsEnabled="{Binding GameOver, FallbackValue=true, Converter={ StaticResource InverseBooleanConverter }}">
+                        
             <Button Width="40" Height="40" FontFamily="Segoe MDL2 Assets" Content="&#xE935;" FontSize="30" HorizontalContentAlignment="Center" HorizontalAlignment="Center"
                     VerticalContentAlignment="Center" VerticalAlignment="Center" Command="{Binding Path=MoveSnake}" CommandParameter="Up" ToolTip="Move Up!"/>
             <StackPanel Orientation="Horizontal" >
@@ -122,12 +127,24 @@
         </StackPanel>
         <ItemsControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" x:Name="lst" ItemsSource="{Binding Items}" ItemTemplate="{DynamicResource DataTemplate_Level1}"/>
 
-        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="GameOverlay" Background="Aqua" Opacity="50" Visibility="{Binding GameOver, FallbackValue=Hidden, Converter={ StaticResource BoolToVisibilityConverter }, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
+        <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" Name="GameOverlay" Background="#7f7fffd4"  Visibility="{Binding GameOver, FallbackValue=Hidden, Converter={ StaticResource BoolToVisibilityConverter }, Mode=OneWay,UpdateSourceTrigger=PropertyChanged}">
             <TextBlock Text="Game Over!" Foreground="White" FontWeight="Bold"
                    FontSize="24"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"/>
         </Border>
     </Grid>
-    
+        <Menu DockPanel.Dock="Top">
+
+            <MenuItem Header="_Options">
+                <MenuItem Header="_BounceMode" IsCheckable="true" IsChecked="{Binding BounceMode}" ToolTip="Just Stop at Walls"/>
+                <MenuItem Header="_DifficultMode" IsCheckable="true" IsChecked="{Binding DifficultMode}" ToolTip="Hitting any part of snake loses game!"/>
+                <MenuItem Header="_BackwardsMode" IsCheckable="true" IsChecked="{Binding BackwardsMode}" ToolTip="Allow Snake to go backwards"/>
+            </MenuItem>
+           
+
+           
+
+        </Menu>
+    </DockPanel>
 </Window>

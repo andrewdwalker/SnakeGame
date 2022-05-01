@@ -13,7 +13,9 @@ namespace SnakeGame.Models
       up = 0,
       down = 1,
       left = 2,
-      right = 3
+      right = 3,
+      none = 4 // used for start of game
+
 
    }
    public class GameGridModel
@@ -21,10 +23,10 @@ namespace SnakeGame.Models
       private uint _rows;
       private uint _columns;
       private uint _numberOfFoods;
-      //private Food _food;
       private List<Snake> _snakes;
       private List<List<GridElement>> _gridElements;
-      bool _gameOver = false;
+      private bool _gameOver = false;
+      private Direction _oldDirection = Direction.none;
 
       public event PropertyChangedEventHandler PropertyChanged;
 
@@ -53,6 +55,9 @@ namespace SnakeGame.Models
       public uint Columns { get => _columns; private set => _columns = value; }
       public uint NumberOfFoods { get => _numberOfFoods; private set => _numberOfFoods = value; }
 
+      public bool BounceMode { get; set; }
+      public bool DifficultMode { get; set; }
+      public bool BackwardsMode { get; set; }
       public bool GameOver
       {
          get
@@ -71,9 +76,9 @@ namespace SnakeGame.Models
          Rows = rows;
          Columns = columns;
          NumberOfFoods = numberOfFoods;
-         //_food = food;
-         //_snakes = snakes;
-         //_gridElements = new GridElement[_rows, _columns];
+
+         _oldDirection = Direction.none; 
+
          _gridElements = new List<List<GridElement>>();
          for (int i = 0; i < Rows; i++)
          {
@@ -100,13 +105,29 @@ namespace SnakeGame.Models
          _snakes = new List<Snake>();
          for (int i = 0; i < numberOfSnakes; i++)
          {
-            var possibilities = _gridElements.SelectMany(p => p).Where(t => t.GridElementType != GridElementType.Snake).ToList();
-            if (possibilities != null && possibilities.Count() > 0) // TODO: handle error condition
+            var possibilities = _gridElements.SelectMany(p => p).Where(t => t.GridElementType != GridElementType.Snake && t.GridElementType != GridElementType.Food).ToList();
+            if (possibilities != null && possibilities.Count() > 0) 
             {
                Random rnd = new Random(i + DateTime.Now.Second);
                var snake = possibilities[rnd.Next(0, possibilities.Count() - 1)];
                snake.GridElementType = GridElementType.Snake;
                _snakes.Add(new Snake(snake));
+            }
+            else // since the requirements demand that every square could have food, we need this else statement
+            {
+               possibilities = _gridElements.SelectMany(p => p).Where(t => t.GridElementType != GridElementType.Snake).ToList();
+               if (possibilities != null && possibilities.Count() > 0)
+               {
+                  Random rnd = new Random(i + DateTime.Now.Second);
+                  var snake = possibilities[rnd.Next(0, possibilities.Count() - 1)];
+                  snake.GridElementType = GridElementType.Snake;
+                  _snakes.Add(new Snake(snake));
+               }
+               else
+               {
+                  // TODO: handle error condition. For now, just throw as it is unexpected (at least for 1 snake case)
+                  throw new Exception("No suitable spaces for snakes");
+               }
             }
          }
 
@@ -128,28 +149,37 @@ namespace SnakeGame.Models
          var tail = snake.GetTail();
          int newRow = 0;
          int newCol = 0;
+         
          switch (direction)
          {
             case Direction.up:
                {
+                  if (!BackwardsMode && _oldDirection == Direction.down)
+                     return false;
                   newRow = (int)head.Row - 1;
                   newCol = (int)head.Col;
                   break;
                }
             case Direction.down:
                {
+                  if (!BackwardsMode && _oldDirection == Direction.up)
+                     return false;
                   newRow = (int)head.Row + 1;
                   newCol = (int)head.Col;
                   break;
                }
             case Direction.left:
                {
+                  if (!BackwardsMode && _oldDirection == Direction.right)
+                     return false;
                   newRow = (int)head.Row;
                   newCol = (int)head.Col - 1;
                   break;
                }
             case Direction.right:
                {
+                  if (!BackwardsMode && _oldDirection == Direction.left)
+                     return false;
                   newRow = (int)head.Row;
                   newCol = (int)head.Col + 1;
                   break;
@@ -157,12 +187,17 @@ namespace SnakeGame.Models
             default:
                {
                   // TODO log.  Error in logic here!
-                  throw new ArgumentException();
+                  throw new ArgumentException("Unexpected direction!");
                   break;
                }
          };
          if (HitBoundary(newRow, newCol))
          {
+            if (BounceMode)
+            {
+               // do nothing. We can hit walls. We just don't do anything
+               return false;
+            }
             message = "Hit Boundary";
             DebugMessage = "Game Over: " + message;
             OnPropertyChanged("DebugMessage");
@@ -178,8 +213,16 @@ namespace SnakeGame.Models
             return false;
             
          }
+         else if (DifficultMode && snake.GetSnakeElement(newRow, newCol) != null)
+         {
+            message = "You hit snake body and are in difficult model";
+            DebugMessage = "Game Over: " + message;
+            OnPropertyChanged("DebugMessage");
+            GameOver = true;
+            return false;
+         }
          // TODO check for hitting other snakes.  Or just other snake tails?
-         // TOD check if food all eaten
+         
          else
          {
             if (GetGridElement(newRow, newCol).GridElementType != GridElementType.Food)
@@ -187,6 +230,17 @@ namespace SnakeGame.Models
                snake.DeleteTail();
             }
             snake.AddHead(GetGridElement(newRow, newCol));
+            _oldDirection = direction;
+         }
+
+         // TOD check if food all eaten
+         if (_gridElements.SelectMany(p => p).Any(n => n.GridElementType == GridElementType.Food) == false)
+         {
+            message = "You win! You ate all the food.";
+            DebugMessage = "Game Over: " + message;
+            OnPropertyChanged("DebugMessage");
+            GameOver = true;
+            return true;
          }
 
          OnPropertyChanged("GridElements");

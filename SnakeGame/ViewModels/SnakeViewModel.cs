@@ -28,11 +28,11 @@ namespace SnakeGame.ViewModels
       {
          _gameGridModel = gameGridModel;
 
-         //NumberOfRows = _gameGridModel.Rows;
-         //NumberOfCols = _gameGridModel.Columns;
-         //NumberOfFoods = _gameGridModel.NumberOfFoods;
-
          _gameGridModel.PropertyChanged += _gameGridModel_PropertyChanged;
+
+         DifficultMode = false;
+         BackwardsMode = true;
+         BounceMode = false;
       }
 
       
@@ -133,6 +133,25 @@ namespace SnakeGame.ViewModels
       {
          get => _gameGridModel.GameOver;
       }
+
+      public bool BounceMode
+      {
+         get => _gameGridModel.BounceMode;
+         set => _gameGridModel.BounceMode = value;
+      }
+
+      public bool DifficultMode
+      {
+         get => _gameGridModel.DifficultMode;
+         set => _gameGridModel.DifficultMode = value;
+      }
+
+      public bool BackwardsMode
+      {
+         get => _gameGridModel.BackwardsMode;
+         set => _gameGridModel.BackwardsMode = value;
+      }
+
       #endregion
 
       #region ICommmand and implementations

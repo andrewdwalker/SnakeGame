@@ -10,3 +10,18 @@
 9. Sound?
 10. Done Make other snake yellow
 11. 
+
+5/2/22
+
+Added features...
+1. Keyboard controls for player 1 (up/down/left/right arrows)
+2. Second player.  Keyboard controls for player 2( w/s/a/d). Second player yellow. Easily extendible to 3+ players
+3. Added modes such as Not dying on walls, dying if you hit any part of yourself (not just tail), and not allowing reverse movement.
+   Kept requirments as defaults (you can go backwards, die if you hit a wall, and go right through your own body, but not tail)
+4. 
+
+5/2/22
+What I'd add if I had more time and what I wouldn't bother with
+1. No time for Unit Tests. I did this fast. Other projects I'm sharing have unit tests.
+2. No need (or time) for await/async.
+3. Should really adding persist to file functionality.

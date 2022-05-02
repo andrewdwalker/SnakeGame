@@ -32,6 +32,7 @@ namespace SnakeGame.Models
 
       public GameGridModel(uint rows, uint columns, uint numberOfFoods, uint numberOfSnakes)//, Food food, List<Snake> snakes)
       {
+         NumberOfSnakes = numberOfSnakes;
          SetupGameGridModel(rows, columns, numberOfFoods, numberOfSnakes);
 
       }
@@ -55,6 +56,7 @@ namespace SnakeGame.Models
       public uint Columns { get => _columns; private set => _columns = value; }
       public uint NumberOfFoods { get => _numberOfFoods; private set => _numberOfFoods = value; }
 
+      public uint NumberOfSnakes { get; set; }
       public bool BounceMode { get; set; }
       public bool DifficultMode { get; set; }
       public bool BackwardsMode { get; set; }
@@ -76,8 +78,9 @@ namespace SnakeGame.Models
          Rows = rows;
          Columns = columns;
          NumberOfFoods = numberOfFoods;
+         NumberOfSnakes = numberOfSnakes;
 
-         _oldDirection = Direction.none; 
+         _oldDirection = Direction.none;
 
          _gridElements = new List<List<GridElement>>();
          for (int i = 0; i < Rows; i++)
@@ -97,7 +100,9 @@ namespace SnakeGame.Models
             if (possibilities != null && possibilities.Count() > 0) // TODO: handle error condition
             {
                Random rnd = new Random(i + DateTime.Now.Second);
-               possibilities[rnd.Next(0, possibilities.Count() - 1)].GridElementType = GridElementType.Food;
+               var food = possibilities[rnd.Next(0, possibilities.Count() - 1)];
+               food.GridElementType = GridElementType.Food;
+               
             }
          }
 
@@ -105,13 +110,15 @@ namespace SnakeGame.Models
          _snakes = new List<Snake>();
          for (int i = 0; i < numberOfSnakes; i++)
          {
+            System.Windows.Media.Brush suggestedColor = (i == 0) ? System.Windows.Media.Brushes.Blue : System.Windows.Media.Brushes.Yellow; // TODO Allow for different color for snake 3,4, etc.
             var possibilities = _gridElements.SelectMany(p => p).Where(t => t.GridElementType != GridElementType.Snake && t.GridElementType != GridElementType.Food).ToList();
-            if (possibilities != null && possibilities.Count() > 0) 
+            if (possibilities != null && possibilities.Count() > 0)
             {
                Random rnd = new Random(i + DateTime.Now.Second);
                var snake = possibilities[rnd.Next(0, possibilities.Count() - 1)];
                snake.GridElementType = GridElementType.Snake;
-               _snakes.Add(new Snake(snake));
+               
+               _snakes.Add(new Snake(snake, i));
             }
             else // since the requirements demand that every square could have food, we need this else statement
             {
@@ -121,7 +128,8 @@ namespace SnakeGame.Models
                   Random rnd = new Random(i + DateTime.Now.Second);
                   var snake = possibilities[rnd.Next(0, possibilities.Count() - 1)];
                   snake.GridElementType = GridElementType.Snake;
-                  _snakes.Add(new Snake(snake));
+                  
+                  _snakes.Add(new Snake(snake, i));
                }
                else
                {
@@ -141,18 +149,19 @@ namespace SnakeGame.Models
       /// <param name="direction"></param>
       /// <param name="message"></param>
       /// <returns></returns>
-      public bool MoveSnake(Direction direction, out string message)
+      public bool MoveSnake(Direction direction, int snakeNumber, out string message)
       {
          message = "";
-         Snake snake = _snakes[0];  // TODO, change so we can move any snake
+         Snake snake = _snakes[snakeNumber];
          var head = snake.GetHead();
          var tail = snake.GetTail();
          int newRow = 0;
          int newCol = 0;
-         
+
          switch (direction)
          {
             case Direction.up:
+
                {
                   if (!BackwardsMode && _oldDirection == Direction.down)
                      return false;
@@ -188,7 +197,7 @@ namespace SnakeGame.Models
                {
                   // TODO log.  Error in logic here!
                   throw new ArgumentException("Unexpected direction!");
-                  break;
+
                }
          };
          if (HitBoundary(newRow, newCol))
@@ -199,41 +208,58 @@ namespace SnakeGame.Models
                return false;
             }
             message = "Hit Boundary";
-            DebugMessage = "Game Over: " + message;
+            DebugMessage = "Game Over. Player " + snakeNumber + " loses. " + message;
             OnPropertyChanged("DebugMessage");
             GameOver = true;
             return false;
          }
          else if (newRow == tail.Row && newCol == tail.Col)
          {
-            message = "You hit your tail";
-            DebugMessage = "Game Over: " + message;
+            message = "You hit your own tail";
+            DebugMessage = "Game Over. Player " + snakeNumber + " loses. " + message;
             OnPropertyChanged("DebugMessage");
             GameOver = true;
             return false;
-            
+
          }
          else if (DifficultMode && snake.GetSnakeElement(newRow, newCol) != null)
          {
-            message = "You hit snake body and are in difficult model";
-            DebugMessage = "Game Over: " + message;
+            message = "You hit your own snake body and are in difficult model";
+            DebugMessage = "Game Over. Player " + snakeNumber + " loses. " + message;
             OnPropertyChanged("DebugMessage");
             GameOver = true;
             return false;
          }
          // TODO check for hitting other snakes.  Or just other snake tails?
-         
-         else
+         else if (NumberOfSnakes > 1)
          {
-            if (GetGridElement(newRow, newCol).GridElementType != GridElementType.Food)
+            for (int i = 0; i < NumberOfSnakes; i++)
             {
-               snake.DeleteTail();
+               if (i == snakeNumber)
+                  continue;
+
+               if (_snakes[i].GetSnakeElement(newRow, newCol) != null)
+               {
+                  message = "You hit your opponent's snake body.";
+                  DebugMessage = "Game Over. Player " + snakeNumber + " loses. " + message;
+                  OnPropertyChanged("DebugMessage");
+                  GameOver = true;
+                  return false;
+               }
             }
-            snake.AddHead(GetGridElement(newRow, newCol));
-            _oldDirection = direction;
          }
 
-         // TOD check if food all eaten
+
+         if (GetGridElement(newRow, newCol).GridElementType != GridElementType.Food)
+         {
+            snake.DeleteTail();
+         }
+         snake.AddHead(GetGridElement(newRow, newCol));
+         _oldDirection = direction;
+
+
+         // TODO determine who ate more food and assign a winner. 
+         // and/or get rid of idea of eating all the food ends the game. Let the 2 snakes battle it out!
          if (_gridElements.SelectMany(p => p).Any(n => n.GridElementType == GridElementType.Food) == false)
          {
             message = "You win! You ate all the food.";
@@ -250,11 +276,16 @@ namespace SnakeGame.Models
 
       public void PrintSnakeInfo()
       {
+         StringBuilder sb = new StringBuilder();
          foreach (Snake snake in _snakes)
          {
-            DebugMessage = snake.GetSnakeInfo();
-            OnPropertyChanged("DebugMessage");
+            sb.Append(snake.GetSnakeInfo());
+            sb.AppendLine();
+            
+            
          }
+         DebugMessage = sb.ToString();
+         OnPropertyChanged("DebugMessage");
       }
 
       private bool HitBoundary(int newRow, int newCol)

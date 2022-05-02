@@ -28,7 +28,15 @@
         </Style>
 
         <DataTemplate x:Key="DataTemplate_Level2">
-            <Button Content="{Binding GridElementType}" Background="{Binding Path=GridElementType, Converter={StaticResource TileToColorConverter}}"  Height="30" Width="30" Margin="1,1,1,1"/>
+            <Button Content="{Binding GridElementType}"  Height="30" Width="30" Margin="1,1,1,1">
+                <Button.Background>
+                    <MultiBinding Converter="{StaticResource TileToColorConverter }">
+                        <Binding Path="GridElementType"   />
+                        <Binding Path="SnakeNumber"  />
+                    </MultiBinding>
+                </Button.Background>
+               
+            </Button>
         </DataTemplate>
 
         <DataTemplate x:Key="DataTemplate_Level1">
@@ -42,11 +50,16 @@
         </DataTemplate>
     </Window.Resources>
     <Window.InputBindings>
-        <KeyBinding Key="Up" Command="{Binding MoveSnake}" CommandParameter="Up"></KeyBinding>
-        <KeyBinding Key="Right" Command="{Binding MoveSnake}" CommandParameter="Right"></KeyBinding>
+        <KeyBinding Key="Up"  Command="{Binding MoveSnake}" CommandParameter="Up" ></KeyBinding>
         <KeyBinding Key="Down" Command="{Binding MoveSnake}" CommandParameter="Down"></KeyBinding>
         <KeyBinding Key="Left" Command="{Binding MoveSnake}" CommandParameter="Left"></KeyBinding>
-        <KeyBinding Key="A" Command="{Binding MoveSnake}" CommandParameter="Left"></KeyBinding>
+        <KeyBinding Key="Right" Command="{Binding MoveSnake}" CommandParameter="Right"></KeyBinding>
+
+        <KeyBinding Key="W" Command="{Binding MoveSnake}" CommandParameter="W"></KeyBinding>
+        <KeyBinding Key="S" Command="{Binding MoveSnake}" CommandParameter="S"></KeyBinding>
+        <KeyBinding Key="A" Command="{Binding MoveSnake}" CommandParameter="A"></KeyBinding>
+        <KeyBinding Key="D" Command="{Binding MoveSnake}" CommandParameter="D"></KeyBinding>
+        
     </Window.InputBindings>
     <DockPanel>
     <Grid DockPanel.Dock="Bottom">
@@ -73,12 +86,12 @@
                     VerticalContentAlignment="Center" VerticalAlignment="Center" Command="{Binding Path=MoveSnake}" CommandParameter="Right" ToolTip="Move Right!"/>
             </StackPanel>
             <Button Width="40" Height="40" FontFamily="Segoe MDL2 Assets" Content="&#xE936;" FontSize="30" HorizontalContentAlignment="Center" HorizontalAlignment="Center"
-                    VerticalContentAlignment="Center" VerticalAlignment="Center" Command="{Binding Path=MoveSnake}" CommandParameter="Down" ToolTip="Move Down!"/>
+                    VerticalContentAlignment="Center" VerticalAlignment="Center" Command="{Binding Path=MoveSnake}" CommandParameter="Down"  ToolTip="Move Down!"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+        <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical" >
             <Label>Debug Info</Label>
-            <TextBlock Text="{Binding DebugMessage}"></TextBlock>
+                <TextBlock  Width="500" TextWrapping="Wrap" Text="{Binding DebugMessage}"></TextBlock>
             <Button Content="Print Snake Info" Command="{Binding Path=PrintSnakeInfo}"></Button>
         </StackPanel>
         
@@ -136,6 +149,20 @@
     </Grid>
         <Menu DockPanel.Dock="Top">
 
+            <MenuItem Header="Number Of Players"  ItemsSource="{Binding Path=NumberOfPlayersCollection}">
+                <MenuItem.ItemContainerStyle>
+                    <Style TargetType="MenuItem">
+                        <Setter Property="Header" Value="{Binding Title}" />
+                        <Setter Property="IsCheckable" Value="True" />
+
+                        <Setter Property="IsChecked" Value="{Binding IsChecked,Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Setter Property="Command" Value="{Binding DataContext.NumberOfPlayersCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type MenuItem}}}" />
+                        <Setter Property="CommandParameter" Value="{Binding Player}" />
+                    </Style>
+                </MenuItem.ItemContainerStyle>
+
+
+            </MenuItem>
             <MenuItem Header="_Options">
                 <MenuItem Header="_BounceMode" IsCheckable="true" IsChecked="{Binding BounceMode}" ToolTip="Just Stop at Walls"/>
                 <MenuItem Header="_DifficultMode" IsCheckable="true" IsChecked="{Binding DifficultMode}" ToolTip="Hitting any part of snake loses game!"/>

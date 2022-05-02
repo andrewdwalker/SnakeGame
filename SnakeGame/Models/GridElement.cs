@@ -20,6 +20,8 @@ namespace SnakeGame.Models
       private uint _row;
       private uint _col;
       private GridElementType _gridElementType = GridElementType.Free;
+      private int _snakeNumber = 0;
+      private System.Windows.Media.Brush _suggestedColor = System.Windows.Media.Brushes.White;
       public GridElement(uint row, uint col, GridElementType gridElementType = GridElementType.Free)
       {
          _row = row;
@@ -39,6 +41,37 @@ namespace SnakeGame.Models
             OnPropertyChanged("GridElementType");
          }
       }
+
+      /// <summary>
+      /// Meaningless unless GridElementType is snake;
+      /// </summary>
+      public int SnakeNumber
+      {
+         get
+         {
+            return _snakeNumber;
+         }
+         set
+         {
+            _snakeNumber = value;
+            OnPropertyChanged("SnakeNumber");
+         }
+      }
+         
+
+
+
+      //public System.Windows.Media.Brush SuggestedColor
+      //{
+      //   get
+      //   {
+      //      return _suggestedColor;
+      //   }
+      //   set
+      //   {
+      //      _suggestedColor = value;
+      //   }
+      //}
       public uint Row
       {
          get

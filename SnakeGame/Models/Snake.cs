@@ -9,11 +9,13 @@ namespace SnakeGame.Models
    public class Snake
    {
       private List<GridElement> _snake = new List<GridElement>();
-
-      public Snake(GridElement element)
+      private int _snakeNumber = 0;
+      public Snake(GridElement element, int snakeNumber)
       {
-         element.GridElementType = GridElementType.Snake;
-         _snake.Add(element);
+         _snakeNumber = snakeNumber;
+         //element.GridElementType = GridElementType.Snake;
+         //_snake.Add(element);
+         AddHead(element);
       }
 
       public GridElement GetHead()
@@ -28,7 +30,9 @@ namespace SnakeGame.Models
       
       public void AddHead(GridElement element)
       {
+         element.SnakeNumber = _snakeNumber;
          element.GridElementType = GridElementType.Snake;
+         
          _snake.Insert(0, element);
 
       }

@@ -1,10 +1,12 @@
 ﻿4/29/22 TODO
 1. More unit tests
-2. Second Player? New set of controls for second player: W,A,S,D
+2.Done  Second Player? New set of controls for second player: W,A,S,D
 3.Done Modes Advanced mode where by hitting any part of snake you lose.
 4.Done Disable controls when game over.
 5. More error checking.
 6. Persist game to json?
 7.Done Modes: Disallow hitting boundary? Disallow going backwards?
-8. Are we using best containers? List<>, List<List<>>
+8. Done Are we using best containers? List<>, List<List<>>
 9. Sound?
+10. Done Make other snake yellow
+11. 

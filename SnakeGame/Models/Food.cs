@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace SnakeGame.Models
 {
+
+   // TODO Not used. ERASE!
    public class Food
    {
       List<GridElement> _foods = new List<GridElement>();
